@@ -1,362 +1,202 @@
 package com.example.lab10;
 
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 
-import java.sql.*;
-import java.util.Properties;
+import java.sql.Connection;
+import java.sql.SQLException;
 
-import static java.sql.DriverManager.getConnection;
-
-public class AnimalsController {
-
+public class AnimalsController { //NOPMD - suppressed AtLeastOneConstructor - TODO explain reason for suppression
     /**
-     * инициализация элементов на форме
+     * инициализация элемента таблица
      **/
-    @FXML
-    Button buttonLoadData;
-    @FXML
-    Button buttonAddData;
     @FXML
     public TableView<Animal> table1;
-    private ObservableList<Animal> data;
+
+    /**
+     * инициализация кнопки добавления данных
+     **/
+    @FXML
+    Button buttonAddData;
+
+    /***инициализация колонки id**/
     @FXML
     TableColumn<Animal, Integer> id;
+    /***инициализация колонки name**/
     @FXML
     TableColumn<Animal, String> name;
+
+    /***инициализация колонки latinName**/
     @FXML
     TableColumn<Animal, String> latinName;
+
+    /***инициализация колонки animalType**/
+
     @FXML
     TableColumn<Animal, String> animalType;
+
+    /***инициализация колонки activeTime**/
     @FXML
     TableColumn<Animal, String> activeTime;
+
+    /***инициализация колонки lenMin**/
     @FXML
     TableColumn<Animal, Double> lenMin;
+    /***инициализация колонки lenMax**/
     @FXML
     TableColumn<Animal, Double> lenMax;
+    /***инициализация колонки wgMin**/
     @FXML
     TableColumn<Animal, Double> wgMin;
+
+    /***инициализация колонки wgMax**/
     @FXML
     TableColumn<Animal, Double> wgMax;
+    /***инициализация колонки lifespan**/
     @FXML
     TableColumn<Animal, Double> lifespan;
+    /***инициализация колонки habitat**/
     @FXML
     TableColumn<Animal, String> habitat;
+    /***инициализация колонки diet**/
     @FXML
     TableColumn<Animal, String> diet;
+    /***инициализация колонки geoRange**/
     @FXML
     TableColumn<Animal, String> geoRange;
+    /***инициализация колонки imageLink**/
     @FXML
     TableColumn<Animal, String> imageLink;
+
+    /***инициализация элемента header**/
     @FXML
     TitledPane header;
+
+    /***инициализация кнопки вывода птиц**/
     @FXML
-    Button Bird;
+    Button bird;
+    /***инициализация кнопки вывода млекопетающих**/
     @FXML
-    Button Mammal;
+    Button mammal;
+    /***инициализация кнопки вывода рептилий**/
     @FXML
-    Button Reptile;
+    Button reptile;
+    /***инициализация кнопки вывода marsupial**/
     @FXML
-    Button Marsupial;
+    Button marsupial;
+
+    /***инициализация кнопки вывода амфибий**/
     @FXML
-    Button Amphibian;
+    Button amphibian;
+
+    /***инициализация кнопки поиска животного**/
     @FXML
-    Button Find;
+    Button findButton;
+    /***инициализация поля для поиска животного**/
     @FXML
     TextField nameOfAnimal;
+    /***инициализация кнопки поиска загрузки данных**/
+
+    @FXML
+    Button buttonLoadData;
+
     /**
-     * Инициализация переменной соеденения с бд
+     * экземпляр класса DataBaseAnimals
      **/
-    private Connection connection = null;
+    DataBaseAnimals dataBaseAnimals;
+    /***поле connection*/
+    private Connection connection;
 
     /**
      * обработчик события нажатия на кнопку подключиться к бд
      */
-    public void ConnectDB(ActionEvent actionEvent) {
-        if (dbConnection(Constants.SERVER + "/mydb", "root", "NoFear@Dinar2021"))
+    public void connectDB(ActionEvent actionEvent) {
+        if (dataBaseAnimals.dbConnection(Constants.SERVER + "/mydb", "root", "NoFear@Dinar2021"))
             header.setText("Connection is successful!");
         else
             header.setText("Some troubles.Ooops...Connection isn't successful!");
     }
 
     /**
+     * метод заполняющий таблицу значениями
+     **/
+    public void setTable1(ObservableList data) {
+        id.setCellValueFactory(new PropertyValueFactory<>("id"));
+        name.setCellValueFactory(new PropertyValueFactory<>("name"));
+        latinName.setCellValueFactory(new PropertyValueFactory<>("latinName"));
+        animalType.setCellValueFactory(new PropertyValueFactory<>("animalType"));
+        activeTime.setCellValueFactory(new PropertyValueFactory<>("activeTime"));
+        lenMin.setCellValueFactory(new PropertyValueFactory<>("lenMin"));
+        lenMax.setCellValueFactory(new PropertyValueFactory<>("lenMax"));
+        wgMin.setCellValueFactory(new PropertyValueFactory<>("wgMin"));
+        wgMax.setCellValueFactory(new PropertyValueFactory<>("wgMax"));
+        lifespan.setCellValueFactory(new PropertyValueFactory<>("lifespan"));
+        habitat.setCellValueFactory(new PropertyValueFactory<>("habitat"));
+        diet.setCellValueFactory(new PropertyValueFactory<>("diet"));
+        geoRange.setCellValueFactory(new PropertyValueFactory<>("geoRange"));
+        imageLink.setCellValueFactory(new PropertyValueFactory<>("imageLink"));
+        table1.setItems(data);
+    }
+
+    /**
      * обработчик события нажатия на кнопку загдузки данных с бд в таблицу
      **/
-    public void LoadData(ActionEvent actionEvent) {
-        try {
-            Statement statement = connection.createStatement();
-            ResultSet resultSet;
-            resultSet = statement.executeQuery("select * from amimals;");
-            data = FXCollections.observableArrayList();
-            id.setCellValueFactory(new PropertyValueFactory<>("id"));
-            name.setCellValueFactory(new PropertyValueFactory<>("name"));
-            latinName.setCellValueFactory(new PropertyValueFactory<>("latinName"));
-            animalType.setCellValueFactory(new PropertyValueFactory<>("animalType"));
-            activeTime.setCellValueFactory(new PropertyValueFactory<>("activeTime"));
-            lenMin.setCellValueFactory(new PropertyValueFactory<>("lenMin"));
-            lenMax.setCellValueFactory(new PropertyValueFactory<>("lenMax"));
-            wgMin.setCellValueFactory(new PropertyValueFactory<>("wgMin"));
-            wgMax.setCellValueFactory(new PropertyValueFactory<>("wgMax"));
-            lifespan.setCellValueFactory(new PropertyValueFactory<>("lifespan"));
-            habitat.setCellValueFactory(new PropertyValueFactory<>("habitat"));
-            diet.setCellValueFactory(new PropertyValueFactory<>("diet"));
-            geoRange.setCellValueFactory(new PropertyValueFactory<>("geoRange"));
-            imageLink.setCellValueFactory(new PropertyValueFactory<>("imageLink"));
-            while (resultSet.next()) {
-                data.add(new Animal(resultSet.getInt("id"), resultSet.getString("name"), resultSet.getString("latinName"), resultSet.getString("animalType"), resultSet.getString("activeTime"), resultSet.getDouble("lenMin"), resultSet.getDouble("lenMax"), resultSet.getDouble("wgMin"), resultSet.getDouble("wgMax"), resultSet.getDouble("lifespan"), resultSet.getString("habitat"), resultSet.getString("diet"), resultSet.getString("geoRange"), resultSet.getString("imageLink")));
-            }
-            table1.setItems(data);
-            resultSet.close();
-            statement.close();
-        } catch (SQLException e) {
-            header.setText("Error while loading data!!!");
-            e.printStackTrace();
-        }
+    public void loadData(ActionEvent actionEvent) {
+        dataBaseAnimals.loadData();
+        setTable1(dataBaseAnimals.getData());
     }
 
     /**
      * обработчик события нажатия на кнопку добавления данных в бд (одна случайная запись)
      **/
-    public void AddData(ActionEvent actionEvent) {
+    public void addData(ActionEvent actionEvent) {
+        dataBaseAnimals.addData();
+        loadData(actionEvent);
 
-        String name;
-        String latinName;
-        String animalType;
-        String activeTime;
-        Double lenMin;
-        Double lenMax;
-        Double wgMin;
-        Double wgMax;
-        Double lifespan;
-        String habitat;
-        String diet;
-        String geoRange;
-        String imageLink;
-
-        try {
-            Animals animals = new Animals();
-            Animal animal = animals.getRandomAnimal();
-            name = animal.getName();
-            latinName = animal.getLatinName();
-            animalType = animal.getAnimalType();
-            activeTime = animal.getActiveTime();
-            lenMin = animal.getLenMin();
-            lenMax = animal.getLenMax();
-            wgMin = animal.getWgMin();
-            wgMax = animal.getWgMax();
-            lifespan = animal.getLifespan();
-            habitat = animal.getHabitat();
-            diet = animal.getDiet();
-            geoRange = animal.getGeoRange();
-            imageLink = animal.getImageLink();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return;
-        }
-        try {
-            Properties properties = new Properties();
-            properties.setProperty("user", "root");
-            properties.setProperty("password", "NoFear@Dinar2021");
-            properties.setProperty("serverTimezone", "UTC");
-            properties.setProperty("useSSL", "false");
-            properties.setProperty("autoReconnect", "true");
-            connection = getConnection(Constants.URL, properties);
-            Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("select * from amimals;");
-            PreparedStatement preparedStatement = connection.prepareStatement("insert into amimals(name, latinName, animalType, activeTime, lenMin, lenMax, wgMin, wgMax, lifespan, habitat, diet, geoRange, imageLink) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
-            preparedStatement.setString(1, name);
-            preparedStatement.setString(2, latinName);
-            preparedStatement.setString(3, animalType);
-            preparedStatement.setString(4, activeTime);
-            preparedStatement.setDouble(5, lenMin);
-            preparedStatement.setDouble(6, lenMax);
-            preparedStatement.setDouble(7, wgMin);
-            preparedStatement.setDouble(8, wgMax);
-            preparedStatement.setDouble(9, lifespan);
-            preparedStatement.setString(10, habitat);
-            preparedStatement.setString(11, diet);
-            preparedStatement.setString(12, geoRange);
-            preparedStatement.setString(13, imageLink);
-            int result = preparedStatement.executeUpdate();
-            resultSet.close();
-            statement.close();
-            LoadData(actionEvent);
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            if (connection != null) {
-                try {
-                    // connection.close();
-                } catch (Exception e) {
-                }
-            }
-        }
     }
 
     /**
      * обработчик события закрытия соединения
      **/
-    public void Exit(ActionEvent actionEvent) {
-        if (connection != null) {
-            try {
-                connection.close();
-                header.setText("Disconnected successfully");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    /**
-     * метод подключение к бд
-     */
-    private boolean dbConnection(String conn, String login, String password) {
-        boolean result = false;
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
-        try {
-            String url = "jdbc:mysql://" + conn;
-            Properties properties = new Properties();
-            properties.setProperty("user", login);
-            properties.setProperty("password", password);
-            properties.setProperty("serverTimezone", "UTC");
-            properties.setProperty("useSSL", "false");
-            properties.setProperty("autoReconnect", "true");
-            connection = getConnection(url, properties);
-            System.out.println("Connection ID" + connection.toString());
-            result = true;
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return result;
+    public void exit(ActionEvent actionEvent) throws SQLException {
+        dataBaseAnimals.close();
+        header.setText("Disconnected successfully");
     }
 
     /**
      * обработчик события выбора животных разных типов
      */
     public void select(ActionEvent actionEvent) {
-        String selectBirds = "select * from amimals where animalType = 'Bird'; ";
-        String selectMammals = "select * from amimals where animalType ='Mammal'; ";
-        String selectReptiles = "select * from amimals where animalType ='Reptile'; ";
-        String selectMarsupials = "select * from amimals where animalType ='Marsupial'; ";
-        String selectAmphibians = "select * from amimals where animalType ='Amphibian'; ";
-        try {
-            Statement statement = connection.createStatement();
-            ResultSet resultSet = null;
-            if (actionEvent.getSource() == Bird) {
-                resultSet = statement.executeQuery(selectBirds);
-            } else if (actionEvent.getSource() == Mammal) {
-                resultSet = statement.executeQuery(selectMammals);
-            } else if (actionEvent.getSource() == Reptile) {
-                resultSet = statement.executeQuery(selectReptiles);
-            } else if (actionEvent.getSource() == Marsupial) {
-                resultSet = statement.executeQuery(selectMarsupials);
-            } else if (actionEvent.getSource() == Amphibian) {
-                resultSet = statement.executeQuery(selectAmphibians);
-            }
-            data = FXCollections.observableArrayList();
-            id.setCellValueFactory(new PropertyValueFactory<>("id"));
-            name.setCellValueFactory(new PropertyValueFactory<>("name"));
-            latinName.setCellValueFactory(new PropertyValueFactory<>("latinName"));
-            animalType.setCellValueFactory(new PropertyValueFactory<>("animalType"));
-            activeTime.setCellValueFactory(new PropertyValueFactory<>("activeTime"));
-            lenMin.setCellValueFactory(new PropertyValueFactory<>("lenMin"));
-            lenMax.setCellValueFactory(new PropertyValueFactory<>("lenMax"));
-            wgMin.setCellValueFactory(new PropertyValueFactory<>("wgMin"));
-            wgMax.setCellValueFactory(new PropertyValueFactory<>("wgMax"));
-            lifespan.setCellValueFactory(new PropertyValueFactory<>("lifespan"));
-            habitat.setCellValueFactory(new PropertyValueFactory<>("habitat"));
-            diet.setCellValueFactory(new PropertyValueFactory<>("diet"));
-            geoRange.setCellValueFactory(new PropertyValueFactory<>("geoRange"));
-            imageLink.setCellValueFactory(new PropertyValueFactory<>("imageLink"));
-            while (resultSet.next()) {
-                data.add(new Animal(resultSet.getInt("id"), resultSet.getString("name"), resultSet.getString("latinName"), resultSet.getString("animalType"), resultSet.getString("activeTime"), resultSet.getDouble("lenMin"), resultSet.getDouble("lenMax"), resultSet.getDouble("wgMin"), resultSet.getDouble("wgMax"), resultSet.getDouble("lifespan"), resultSet.getString("habitat"), resultSet.getString("diet"), resultSet.getString("geoRange"), resultSet.getString("imageLink")));
-            }
-            table1.setItems(data);
-            resultSet.close();
-            statement.close();
-        } catch (SQLException e) {
-            header.setText("Error while loading data!!!");
-            e.printStackTrace();
-        }
+        dataBaseAnimals.select(((Button) actionEvent.getSource()).getText());
+        setTable1(dataBaseAnimals.getData());
     }
 
     /**
      * удаление последней записи
      **/
     public void delete(ActionEvent actionEvent) throws SQLException {
-        String deleteString = "delete from amimals where id = (select x.id from (select max(t.id) as id  from amimals t) x);";
-        try {
-            Properties properties = new Properties();
-            properties.setProperty("user", "root");
-            properties.setProperty("password", "NoFear@Dinar2021");
-            properties.setProperty("serverTimezone", "UTC");
-            properties.setProperty("useSSL", "false");
-            properties.setProperty("autoReconnect", "true");
-            connection = getConnection(Constants.URL, properties);
-            Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery("select * from amimals;");
-            PreparedStatement preparedStatement = connection.prepareStatement(deleteString);
-            int result = preparedStatement.executeUpdate();
-            resultSet.close();
-            statement.close();
-            LoadData(actionEvent);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            if (connection != null) {
-                try {
-                    // connection.close();
-                } catch (Exception e) {
-                    header.setText("Error while deleting data!!!");
-                }
-            }
-        }
+        dataBaseAnimals.delete();
+        loadData(actionEvent);
+
     }
 
     /**
      * бработчик события поиск информации по названию животного
      */
     public void find(ActionEvent actionEvent) {
-
         String animalName = nameOfAnimal.getText().trim();
-        String selectAnimal = "select * from amimals where name = '" + animalName + "';";
-        try {
-            Statement statement = connection.createStatement();
-            ResultSet resultSet = null;
-            resultSet = statement.executeQuery(selectAnimal);
-            data = FXCollections.observableArrayList();
-            id.setCellValueFactory(new PropertyValueFactory<>("id"));
-            name.setCellValueFactory(new PropertyValueFactory<>("name"));
-            latinName.setCellValueFactory(new PropertyValueFactory<>("latinName"));
-            animalType.setCellValueFactory(new PropertyValueFactory<>("animalType"));
-            activeTime.setCellValueFactory(new PropertyValueFactory<>("activeTime"));
-            lenMin.setCellValueFactory(new PropertyValueFactory<>("lenMin"));
-            lenMax.setCellValueFactory(new PropertyValueFactory<>("lenMax"));
-            wgMin.setCellValueFactory(new PropertyValueFactory<>("wgMin"));
-            wgMax.setCellValueFactory(new PropertyValueFactory<>("wgMax"));
-            lifespan.setCellValueFactory(new PropertyValueFactory<>("lifespan"));
-            habitat.setCellValueFactory(new PropertyValueFactory<>("habitat"));
-            diet.setCellValueFactory(new PropertyValueFactory<>("diet"));
-            geoRange.setCellValueFactory(new PropertyValueFactory<>("geoRange"));
-            imageLink.setCellValueFactory(new PropertyValueFactory<>("imageLink"));
-            while (resultSet.next()) {
-                data.add(new Animal(resultSet.getInt("id"), resultSet.getString("name"), resultSet.getString("latinName"), resultSet.getString("animalType"), resultSet.getString("activeTime"), resultSet.getDouble("lenMin"), resultSet.getDouble("lenMax"), resultSet.getDouble("wgMin"), resultSet.getDouble("wgMax"), resultSet.getDouble("lifespan"), resultSet.getString("habitat"), resultSet.getString("diet"), resultSet.getString("geoRange"), resultSet.getString("imageLink")));
-            }
-            table1.setItems(data);
-            resultSet.close();
-            statement.close();
-        } catch (SQLException e) {
-            header.setText("Error while loading data!!!");
-            e.printStackTrace();
-        }
+        dataBaseAnimals.find(animalName);
+        setTable1(dataBaseAnimals.getData());
+    }
+
+    /**
+     * инициализатор
+     **/
+    public void initialize() {
+        connection = null;
+        dataBaseAnimals = new DataBaseAnimals();
     }
 }

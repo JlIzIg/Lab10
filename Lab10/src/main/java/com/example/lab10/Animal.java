@@ -27,6 +27,7 @@ import java.util.Comparator;
         "image_link",
         "id"
 })
+
 public class Animal implements Serializable {
     @JsonProperty("name")
     private String name;
