@@ -2,10 +2,8 @@ package com.example.lab10;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-
 import java.sql.*;
 import java.util.Properties;
-
 import static java.sql.DriverManager.getConnection;
 
 public class DataBaseAnimals {
@@ -13,17 +11,28 @@ public class DataBaseAnimals {
     private Connection connection;
     private ObservableList<Animal> data;
 
+    /**
+     * сеттер для Connection
+     */
+    public void setConnection(Connection connection) {
+        this.connection = connection;
+    }
+
     public ObservableList<Animal> getData() {
         return data;
     }
 
+    /**
+     * сеттер для Data
+     */
     public void setData(ObservableList<Animal> data) {
         this.data = data;
     }
 
     /**
-     * етод соединения с БД
+     * метод соединения с БД
      */
+
     public boolean dbConnection(String conn, String login, String password) {
         boolean result = false;
         try {
@@ -41,6 +50,7 @@ public class DataBaseAnimals {
             properties.setProperty("autoReconnect", "true");
             connection = getConnection(url, properties);
             result = true;
+            setConnection(connection);
         } catch (SQLException e) {
             e.printStackTrace(); //NOPMD - suppressed AvoidPrintStackTrace - TODO explain reason for suppression
         }
@@ -53,13 +63,6 @@ public class DataBaseAnimals {
     public void loadData() {
         try {
             data = FXCollections.observableArrayList();
-            Properties properties = new Properties();
-            properties.setProperty("user", "root");
-            properties.setProperty("password", "NoFear@Dinar2021");
-            properties.setProperty("serverTimezone", "UTC");
-            properties.setProperty("useSSL", "false");
-            properties.setProperty("autoReconnect", "true");
-            connection = getConnection(Constants.URL, properties);
             Statement statement = connection.createStatement();
             ResultSet resultSet;
             resultSet = statement.executeQuery("select * from amimals;");
@@ -81,13 +84,6 @@ public class DataBaseAnimals {
     public void delete() throws SQLException {
         String deleteString = "delete from amimals where id = (select x.id from (select max(t.id) as id  from amimals t) x);";
         try {
-            Properties properties = new Properties();
-            properties.setProperty("user", "root");
-            properties.setProperty("password", "NoFear@Dinar2021");
-            properties.setProperty("serverTimezone", "UTC");
-            properties.setProperty("useSSL", "false");
-            properties.setProperty("autoReconnect", "true");
-            connection = getConnection(Constants.URL, properties);
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery("select * from amimals;");
             PreparedStatement preparedStatement = connection.prepareStatement(deleteString);
@@ -138,13 +134,6 @@ public class DataBaseAnimals {
             return; //NOPMD - suppressed AvoidPrintStackTrace - TODO explain reason for suppression
         }
         try {
-            Properties properties = new Properties();
-            properties.setProperty("user", "root");
-            properties.setProperty("password", "NoFear@Dinar2021");
-            properties.setProperty("serverTimezone", "UTC");
-            properties.setProperty("useSSL", "false");
-            properties.setProperty("autoReconnect", "true");
-            connection = getConnection(Constants.URL, properties);
             Statement statement = connection.createStatement();
             ResultSet resultSet = statement.executeQuery("select * from amimals;");
             PreparedStatement preparedStatement = connection.prepareStatement("insert into amimals(name, latinName, animalType, activeTime, lenMin, lenMax, wgMin, wgMax, lifespan, habitat, diet, geoRange, imageLink) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
@@ -178,13 +167,6 @@ public class DataBaseAnimals {
         String selectAnimal = "select * from amimals where name like '%" + animalName + "%';";
         try {
             data = FXCollections.observableArrayList();
-            Properties properties = new Properties();
-            properties.setProperty("user", "root");
-            properties.setProperty("password", "NoFear@Dinar2021");
-            properties.setProperty("serverTimezone", "UTC");
-            properties.setProperty("useSSL", "false");
-            properties.setProperty("autoReconnect", "true");
-            connection = getConnection(Constants.URL, properties);
             Statement statement = connection.createStatement();
             ResultSet resultSet;
             resultSet = statement.executeQuery(selectAnimal);
@@ -205,13 +187,6 @@ public class DataBaseAnimals {
     public void select(String animalType) {
         try {
             data = FXCollections.observableArrayList();
-            Properties properties = new Properties();
-            properties.setProperty("user", "root");
-            properties.setProperty("password", "NoFear@Dinar2021");
-            properties.setProperty("serverTimezone", "UTC");
-            properties.setProperty("useSSL", "false");
-            properties.setProperty("autoReconnect", "true");
-            connection = getConnection(Constants.URL, properties);
             Statement statement = connection.createStatement();
             ResultSet resultSet;
             resultSet = statement.executeQuery("select * from amimals where animalType = '" + animalType + "'; ");
